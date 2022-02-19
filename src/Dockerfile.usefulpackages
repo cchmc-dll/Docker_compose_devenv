@@ -4,6 +4,11 @@ USER root
 
 RUN pip install --no-cache-dir ipyleaflet "plotly>=4.14.3" "ipywidgets>=7.5"
 
+# Install devenv specific packages here from shell script:
+COPY src/devenv_v1.0/install_pip.sh /opt/
+RUN sh /opt/install install_pip.sh 
+
+
 # Install important packages and Graphviz
 RUN set -ex \
  && buildDeps=' \
@@ -16,22 +21,36 @@ RUN set -ex \
 # Install various extensions
 RUN fix-permissions $CONDA_DIR
 
-# RUN jupyter labextension install @jupyterlab/github
-# RUN pip install jupyterlab-git
-RUN pip install jupyterlab-drawio
+RUN jupyter labextension install @jupyterlab/github \
+  && pip install jupyterlab-git \
+  && pip install jupyterlab-drawio
 RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
 RUN jupyter labextension install jupyterlab-plotly
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager plotlywidget
-# RUN pip install --no-cache-dir jupyter-tabnine  --user && \
-#   jupyter nbextension install --py jupyter_tabnine --user && \
-#   jupyter nbextension enable --py jupyter_tabnine --user && \
-#   jupyter serverextension enable --py jupyter_tabnine --user
+RUN pip install --no-cache-dir jupyter-tabnine  --user && \
+  jupyter nbextension install --py jupyter_tabnine --user && \
+  jupyter nbextension enable --py jupyter_tabnine --user && \
+  jupyter serverextension enable --py jupyter_tabnine --user
 RUN pip install --no-cache-dir jupyter_contrib_nbextensions \
-  jupyter_nbextensions_configurator rise
-#  jupyter nbextension enable codefolding/main
+  jupyter_nbextensions_configurator rise \
+  jupyter nbextension enable codefolding/main
 RUN jupyter labextension install @ijmbarr/jupyterlab_spellchecker
 
+# Adding a cleaning script for temp files based on RPY2 Docker images [https://github.com/rpy2/rpy2-docker.git]
+RUN \
+  rm -rf /tmp/* \
+  && apt-get remove --purge -y $BUILDDEPS \
+  && apt-get autoremove -y \
+  && apt-get autoclean -y \
+  && rm -rf /var/lib/apt/lists/*
+
+
+
+
 RUN fix-permissions /home/$NB_USER
+
+
+
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER $NB_UID

@@ -13,6 +13,7 @@ while [[ "$#" -gt 0 ]]; do case $1 in
   --no-datascience-notebook) no_datascience_notebook=1;;
   --python-only) no_datascience_notebook=1;;
   --no-useful-packages) no_useful_packages=1;;
+  --devenv) devenv=1;;
   -s|--slim) no_datascience_notebook=1 && no_useful_packages=1;;
   -h|--help) HELP=1;;
   *) echo "Unknown parameter passed: $1" && HELP=1;;
@@ -92,7 +93,7 @@ echo "
 cat $STACKS_DIR/scipy-notebook/Dockerfile | grep -v BASE_CONTAINER >> $DOCKERFILE
 
 # install Julia and R if not excluded or spare mode is used
-if [[ "$no_datascience_notebook" != 1 ] && [ "$devenv" != 1 ]]; then
+if [[ "$no_datascience_notebook" != 1 ]] && [[ "$devenv" != 1 ]]; then
   echo "
   ############################################################################
   ################ Dependency: jupyter/datascience-notebook ##################

@@ -27,6 +27,7 @@ if [[ "$HELP" == 1 ]]; then
     echo "    --no-datascience-notebook|--python-only: Use not the datascience-notebook from jupyter/docker-stacks, don't install Julia and R."
     echo "    --no-useful-packages: Don't install the useful packages, specified in src/Dockerfile.usefulpackages"
     echo "    --slim: no useful packages and no datascience notebook."
+    echo "    --devenv: python-only and useful-packages."
     exit 21
 fi
 
@@ -91,7 +92,7 @@ echo "
 cat $STACKS_DIR/scipy-notebook/Dockerfile | grep -v BASE_CONTAINER >> $DOCKERFILE
 
 # install Julia and R if not excluded or spare mode is used
-if [[ "$no_datascience_notebook" != 1 ]]; then
+if [[ "$no_datascience_notebook" != 1 ] && [ "$devenv" != 1 ]]; then
   echo "
   ############################################################################
   ################ Dependency: jupyter/datascience-notebook ##################

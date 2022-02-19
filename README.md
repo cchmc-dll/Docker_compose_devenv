@@ -1,3 +1,23 @@
+# JUPYTER-LAB development container for AI-ARC Imaging CORE @ CCHMC
+
+### This source repo for the development environment is (https://github.com/iot-salzburg/gpu-jupyter - Thanks! 
+
+#### Packages specific for CCHMC will include - see requriements.txt for full list:
+       1. Python
+       2. GIT
+       3. DVC
+       4. MONAI
+       5. KERAS
+       6. TENSORFLOW
+       7. PYTORCH
+       8. SKLEARN
+       9. SITK
+       10. Pydicom
+       11. Pynrrd
+
+
+### Documentation below this line is from the source repo.
+
 # GPU-Jupyter
 #### Leverage Jupyter Notebooks with the power of your NVIDIA GPU and perform GPU calculations using Tensorflow and Pytorch in collaborative notebooks. 
 

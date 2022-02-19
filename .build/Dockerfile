@@ -23,7 +23,7 @@ RUN chmod 1777 /tmp && chmod 1777 /var/tmp
 # https://hub.docker.com/_/ubuntu/?tab=tags&name=focal
 ARG ROOT_CONTAINER=ubuntu:focal
 
-FROM ROOT_CONTAINER
+FROM $ROOT_CONTAINER
 
 LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
 ARG NB_USER="jovyan"

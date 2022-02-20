@@ -10,7 +10,10 @@
        5. Pynrrd
        6. Tables
        7. Pygar
-
+    These packages are added under src/devenv_v1.0/install_pip.sh and src/Dockerfile.usefulpackages calls the .sh file.
+#### To build dockerfile for devenv_V1 use the follow command:
+    ./generate-Dockerfile.sh --python-only 
+    docker build -t gpu-jupyter:devenv_v1 .build/
 
 ### Documentation below this line is from the source repo.
 

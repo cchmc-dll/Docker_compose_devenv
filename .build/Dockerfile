@@ -21,9 +21,7 @@ RUN chmod 1777 /tmp && chmod 1777 /var/tmp
 
 # Ubuntu 20.04 (focal)
 # https://hub.docker.com/_/ubuntu/?tab=tags&name=focal
-ARG ROOT_CONTAINER=ubuntu:focal
 
-FROM $ROOT_CONTAINER
 
 LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
 ARG NB_USER="jovyan"
@@ -315,7 +313,7 @@ LABEL maintainer="Christoph Schranz <christoph.schranz@salzburgresearch.at>"
 # https://www.tensorflow.org/install/source#gpu
 # installation via conda leads to errors in version 4.8.2
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir "tensorflow==2.4.1" && \
+    pip install --no-cache-dir "tensorflow==2.8.0" && \
     pip install --no-cache-dir keras
 
 # Install PyTorch with dependencies
@@ -359,8 +357,8 @@ USER root
 RUN pip install --no-cache-dir ipyleaflet "plotly>=4.14.3" "ipywidgets>=7.5"
 
 # Install devenv specific packages here from shell script:
-COPY src/devenv_v1.0/install_pip.sh /opt/
-RUN sh /opt/install install_pip.sh 
+COPY install_pip.sh /opt/
+RUN sh /opt/install_pip.sh 
 
 
 # Install important packages and Graphviz
@@ -385,9 +383,10 @@ RUN pip install --no-cache-dir jupyter-tabnine  --user && \
   jupyter nbextension install --py jupyter_tabnine --user && \
   jupyter nbextension enable --py jupyter_tabnine --user && \
   jupyter serverextension enable --py jupyter_tabnine --user
-RUN pip install --no-cache-dir jupyter_contrib_nbextensions \
-  jupyter_nbextensions_configurator rise \
-  jupyter nbextension enable codefolding/main
+# RUN python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions \
+#   jupyter_nbextensions_configurator rise \
+#   jupyter contrib nbextension install --user
+# RUN jupyter nbextension enable codefolding/main
 RUN jupyter labextension install @ijmbarr/jupyterlab_spellchecker
 
 # Adding a cleaning script for temp files based on RPY2 Docker images [https://github.com/rpy2/rpy2-docker.git]

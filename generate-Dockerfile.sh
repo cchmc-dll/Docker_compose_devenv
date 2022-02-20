@@ -13,7 +13,6 @@ while [[ "$#" -gt 0 ]]; do case $1 in
   --no-datascience-notebook) no_datascience_notebook=1;;
   --python-only) no_datascience_notebook=1;;
   --no-useful-packages) no_useful_packages=1;;
-  --devenv) devenv=1;;
   -s|--slim) no_datascience_notebook=1 && no_useful_packages=1;;
   -h|--help) HELP=1;;
   *) echo "Unknown parameter passed: $1" && HELP=1;;
@@ -28,7 +27,6 @@ if [[ "$HELP" == 1 ]]; then
     echo "    --no-datascience-notebook|--python-only: Use not the datascience-notebook from jupyter/docker-stacks, don't install Julia and R."
     echo "    --no-useful-packages: Don't install the useful packages, specified in src/Dockerfile.usefulpackages"
     echo "    --slim: no useful packages and no datascience notebook."
-    echo "    --devenv: python-only and useful-packages."
     exit 21
 fi
 
@@ -68,7 +66,7 @@ echo "
 #################### Dependency: jupyter/base-image ########################
 ############################################################################
 " >> $DOCKERFILE
-cat $STACKS_DIR/base-notebook/Dockerfile | grep -v BASE_CONTAINER >> $DOCKERFILE
+cat $STACKS_DIR/base-notebook/Dockerfile | grep -v ROOT_CONTAINER >> $DOCKERFILE
 
 # copy files that are used during the build:
 cp $STACKS_DIR/base-notebook/jupyter_server_config.py .build/
@@ -93,7 +91,7 @@ echo "
 cat $STACKS_DIR/scipy-notebook/Dockerfile | grep -v BASE_CONTAINER >> $DOCKERFILE
 
 # install Julia and R if not excluded or spare mode is used
-if [[ "$no_datascience_notebook" != 1 ]] && [[ "$devenv" != 1 ]]; then
+if [[ "$no_datascience_notebook" != 1 ]]; then
   echo "
   ############################################################################
   ################ Dependency: jupyter/datascience-notebook ##################
@@ -121,6 +119,12 @@ if [[ "$no_useful_packages" != 1 ]]; then
   ############################################################################
   " >> $DOCKERFILE
   cat src/Dockerfile.usefulpackages >> $DOCKERFILE
+  PIP_FILE=src/devenv_v1.0/install_pip.sh
+  if test -f "$PIP_FILE"; then
+      echo "$PIP_FILE exists. Copying to build directory"
+      cp $PIP_FILE .build/install_pip.sh
+      chmod +x .build/install_pip.sh
+  fi
 else
   echo "Set 'no-useful-packages', not installing stuff within src/Dockerfile.usefulpackages."
 fi

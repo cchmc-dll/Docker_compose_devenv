@@ -2,19 +2,18 @@
 
 ### This source repo for the development environment is (https://github.com/iot-salzburg/gpu-jupyter - Thanks! 
 
-#### Packages specific for CCHMC will include - see requriements.txt for full list:
-       1. Python
-       2. GIT
-       3. DVC
-       4. MONAI
-       5. KERAS
-       6. TENSORFLOW
-       7. PYTORCH
-       8. SKLEARN
-       9. SITK
-       10. Pydicom
-       11. Pynrrd
-
+#### Packages specific for CCHMC will include:
+       1. DVC
+       2. MONAI
+       3. SimpleITK
+       4. Pydicom
+       5. Pynrrd
+       6. Tables
+       7. Pygar
+    These packages are added under src/devenv_v1.0/install_pip.sh and src/Dockerfile.usefulpackages calls the .sh file.
+#### To build dockerfile for devenv_V1 use the follow command:
+    ./generate-Dockerfile.sh --python-only 
+    docker build -t gpu-jupyter:devenv_v1 .build/
 
 ### Documentation below this line is from the source repo.
 

@@ -5,7 +5,7 @@ cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
 export DOCKERFILE=".build/Dockerfile"
 export STACKS_DIR=".build/docker-stacks"
 # please test the build of the commit in https://github.com/jupyter/docker-stacks/commits/master in advance
-export HEAD_COMMIT="6d61708f1747d4fb15e3c0166805ebb5fba41ea1"
+export HEAD_COMMIT="d719598578d66b768ad87f567b6c7d34c7fac213" # updated on -2/19/22
 
 while [[ "$#" -gt 0 ]]; do case $1 in
   -p|--pw|--password) PASSWORD="$2" && USE_PASSWORD=1; shift;;
@@ -66,10 +66,10 @@ echo "
 #################### Dependency: jupyter/base-image ########################
 ############################################################################
 " >> $DOCKERFILE
-cat $STACKS_DIR/base-notebook/Dockerfile | grep -v BASE_CONTAINER >> $DOCKERFILE
+cat $STACKS_DIR/base-notebook/Dockerfile | grep -v ROOT_CONTAINER >> $DOCKERFILE
 
 # copy files that are used during the build:
-cp $STACKS_DIR/base-notebook/jupyter_notebook_config.py .build/
+cp $STACKS_DIR/base-notebook/jupyter_server_config.py .build/
 cp $STACKS_DIR/base-notebook/fix-permissions .build/
 cp $STACKS_DIR/base-notebook/start.sh .build/
 cp $STACKS_DIR/base-notebook/start-notebook.sh .build/
@@ -119,6 +119,12 @@ if [[ "$no_useful_packages" != 1 ]]; then
   ############################################################################
   " >> $DOCKERFILE
   cat src/Dockerfile.usefulpackages >> $DOCKERFILE
+  PIP_FILE=src/devenv_v1.0/install_pip.sh
+  if test -f "$PIP_FILE"; then
+      echo "$PIP_FILE exists. Copying to build directory"
+      cp $PIP_FILE .build/install_pip.sh
+      chmod +x .build/install_pip.sh
+  fi
 else
   echo "Set 'no-useful-packages', not installing stuff within src/Dockerfile.usefulpackages."
 fi

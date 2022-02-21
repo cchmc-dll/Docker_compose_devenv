@@ -1,7 +1,8 @@
 version: "3.8"
 services:
   gpu-jupyter:
-    build: .build
+    #build: .build
+    image: gpu-jupyter:devenv_v1
     deploy:
       resources:
         reservations:
@@ -12,12 +13,35 @@ services:
       - 8848:8888
     volumes:
       - ./data:/home/jovyan/work
+      - test_volume:/home/jovyan/ARC_RAW_DATA:rw
+      #- test_volume:/home/jovyan/ARC_RAW_DATA:ro
     environment:
       GRANT_SUDO: "yes"
       JUPYTER_ENABLE_LAB: "yes"
-      NB_UID: ${JUPYTER_UID:-1000}
-      NB_GID: ${JUPYTER_GID:-1000}
+      NB_UID: ${JUPYTER_UID:-1005}
+      NB_GID: ${JUPYTER_GID:-1006}
     # enable sudo permissions
     user:
       "root"
     restart: always
+  ml-workspace:
+    #build: .build
+    image: mltooling/ml-workspace:0.13.2
+    ports:
+      - 8849:8080
+    volumes:
+      - test_volume:/workspace/ARC_RAW_DATA:rw
+      - /home/elan/:/workspace/Local
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 1600000000 # ~16gb
+      #- test_volume:/home/jovyan/ARC_RAW_DATA:ro
+    restart: always
+volumes:
+  test_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /mnt/test

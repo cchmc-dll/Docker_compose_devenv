@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Read Credential file for mounting network drives
-. /home/elan/credentials/somd7w.txt
+# For DGX
+. /home/somd7w/credentials/somd7w.txt
 
 sharelocation=//rds6.chmccorp.cchmc.org/IRC-8/AI-ARC-STORE/minio/production
 addrlocation=rds6.chmccorp.cchmc.org

@@ -26,7 +26,7 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-  orthanc: #https://bitbucket.org/osimis/orthanc-setup-samples/src/master/docker/minio/docker-compose.yml
+  orthancM: #https://bitbucket.org/osimis/orthanc-setup-samples/src/master/docker/minio/docker-compose.yml
     # note: you need a post 22.2.0 tag (first tag with S3 plugin included)
     image: osimis/orthanc:latest #chezhipower/orthanc:aws
     ports: 
@@ -54,12 +54,12 @@ services:
       DICOM_WEB_PLUGIN_ENABLED: 'true'
     volumes:
         - orthanc-sqlite-storage:/var/lib/orthanc/db
-  orthancN:
+  orthanc:
     image: osimis/orthanc
     restart: unless-stopped
     volumes: ["/home/somd7w/ml-workspace-neer/orthanc:/var/lib/orthanc/db:Z"]
     environment:
-      ORTHANC__NAME: "orthancN"
+      ORTHANC__NAME: "orthanc-test"
       ORTHANC__REGISTERED_USERS: |
         {"demo": "demo","test":"test"}
       VERBOSE_STARTUP: "true"

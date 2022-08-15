@@ -26,11 +26,11 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-  orthancM: #https://bitbucket.org/osimis/orthanc-setup-samples/src/master/docker/minio/docker-compose.yml
+  orthanctest: #https://bitbucket.org/osimis/orthanc-setup-samples/src/master/docker/minio/docker-compose.yml
     # note: you need a post 22.2.0 tag (first tag with S3 plugin included)
     image: osimis/orthanc:latest #chezhipower/orthanc:aws
     ports: 
-      - 8041:8042
+      - 104:8042
       - 4241:4242
     environment:
       ORTHANC__AWS_S3_STORAGE__BUCKET_NAME: 'orthanc-tcv'
@@ -54,6 +54,25 @@ services:
       DICOM_WEB_PLUGIN_ENABLED: 'true'
     volumes:
         - orthanc-sqlite-storage:/var/lib/orthanc/db
+  orthancryan:
+    image: osimis/orthanc
+    restart: unless-stopped
+    volumes: ["orthanc-ryan-db:/var/lib/orthanc/db:Z"]
+    environment:
+      ORTHANC__NAME: "orthanc-ryan"
+      ORTHANC__REGISTERED_USERS: |
+        {"demo": "demo","test":"test"}
+      VERBOSE_STARTUP: "true"
+      VERBOSE_ENABLED: "true"
+      ORTHANC__DICOM_AET: "orthanc-ryan"
+      # you must enable the StoneViewer and the DicomWeb plugins
+      # StoneViewer configurations
+      STONE_WEB_VIEWER_PLUGIN_ENABLED: "true"
+      ORTHANC__STONE_WEB_VIEWER__DATE_FORMAT: "DD/MM/YYYY"
+      DICOM_WEB_PLUGIN_ENABLED: "true"
+    ports:
+      - 104:4242
+      - 8045:8042
   orthanc:
     image: osimis/orthanc
     restart: unless-stopped
@@ -120,6 +139,7 @@ services:
     restart: always
 volumes:
   orthanc-sqlite-storage:
+  orthanc-ryan-db:
   minio_data_p:   # Cache Drive to SSD /data/minio/1
     driver: local
     driver_opts:

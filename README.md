@@ -1,6 +1,6 @@
 # Development Stack (version 1) for CAAIR center @ CCHMC
 
-### This source repo for the development environment is https://github.com/ml-tooling/ml-workspace
+### The source repo for the development environment is https://github.com/ml-tooling/ml-workspace
 
 #### Packages specific for CCHMC will include:
        1. DVC

@@ -1,0 +1,118 @@
+version: '3.3'
+
+services:
+  minio-0:
+    image: chezhipower/minio:gateway
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio_mnt_p:/data
+      - minio_data_p:/mnt/cache
+    environment:
+      - MINIO_ROOT_USER=${ELANUSR}
+      - MINIO_ROOT_PASSWORD=${ELANPWD}
+      - MINIO_CACHE="on"
+      - MINIO_CACHE_DRIVES=/mnt/cache
+      - MINIO_CACHE_EXCLUDE=" "
+      - MINIO_CACHE_QUOTA=90
+      - MINIO_CACHE_AFTER=3
+      - MINIO_CACHE_WATERMARK_LOW=70
+      - MINIO_CACHE_WATERMARK_HIGH=95
+    #command: ["${RUNFILE}"]
+    command: gateway nas /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+  orthanctest: #https://bitbucket.org/osimis/orthanc-setup-samples/src/master/docker/minio/docker-compose.yml
+    # note: you need a post 22.2.0 tag (first tag with S3 plugin included)
+    image: osimis/orthanc:latest #chezhipower/orthanc:aws
+    ports: 
+      - 8041:8042
+      - 4241:4242
+    environment:
+      ORTHANC__AWS_S3_STORAGE__BUCKET_NAME: 'orthanc-tcv'
+      ORTHANC__AWS_S3_STORAGE__REGION: 'eu-west-1'
+      ORTHANC__AWS_S3_STORAGE__ACCESS_KEY: ${ELANUSR}
+      ORTHANC__AWS_S3_STORAGE__SECRET_KEY: ${ELANPWD}
+      ORTHANC__AWS_S3_STORAGE__ENDPOINT: 'http://minio-0:9000'
+      ORTHANC__AWS_S3_STORAGE__VIRTUAL_ADDRESSING: 'false'
+      ORTHANC__AUTHENTICATION_ENABLED: 'true'
+      ORTHANC__REMOTE_ACCESS_ALLOWED: 'true'
+      ORTHANC__DICOM_SERVER_ENABLED: 'false'
+      VERBOSE_ENABLED: 'true'
+      VERBOSE_STARTUP: 'true'
+      ORTHANC__NAME: 'DGX_Orthanc'
+      ORTHANC__REGISTERED_USERS: |
+        {"demo": "demo","test":"test"}
+      # you must enable the StoneViewer and the DicomWeb plugins
+      # StoneViewer configurations
+      STONE_WEB_VIEWER_PLUGIN_ENABLED: 'true'
+      ORTHANC__STONE_WEB_VIEWER__DATE_FORMAT: 'DD/MM/YYYY'
+      DICOM_WEB_PLUGIN_ENABLED: 'true'
+    volumes:
+        - orthanc-sqlite-storage:/var/lib/orthanc/db
+  ml-workspace-elan:
+    #build: .build
+    image: chezhipower/ml-workspace-devenv1:0-dgx
+    ports:
+      - 8849:8080
+      - 8002:8000
+    volumes:
+      - /home/somd7w/ml-workspace:/workspace
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 800000000 # ~16gb
+    environment:
+      - AUTHENTICATE_VIA_JUPYTER=${ELANPWD}
+      - NVIDIA_VISIBLE_DEVICES=0,1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 2
+              capabilities: [gpu]
+    restart: always
+  ml-workspace-neer:
+    #build: .build
+    image: chezhipower/ml-workspace-devenv1:0-dgx
+    ports:
+      - 8853:8080
+      - 8003:8000
+    volumes:
+      - /home/somd7w/ml-workspace-neer:/workspace
+      - /home/somd7w/shared-DVC-cache:/dvc-cache
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 800000000 # ~16gb
+    environment:
+      - AUTHENTICATE_VIA_JUPYTER=$NEERPWD 
+      - NVIDIA_VISIBLE_DEVICES=4,5,6,7
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 4
+              capabilities: [gpu]
+    restart: always
+volumes:
+  orthanc-sqlite-storage:
+  minio_data_p:   # Cache Drive to SSD /data/minio/
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /raid/minio/production_cache
+  minio_mnt_p:    # RDS6 Remote share,
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /mnt/ARC
+    #external: true #  use this if external NAS was mounted as docker volume using create_docker_volume.sh
